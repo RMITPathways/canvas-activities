@@ -396,14 +396,26 @@
     }
 
     // --- UTILITIES ---
-    function parseArrayString(str) {
-        if (!str || str === "NaN") return "";
-        try {
-            const arr = JSON.parse(str);
-            return Array.isArray(arr) ? arr.join(", ") : str;
-        } catch (e) {
-            return str;
+    function parseArrayString(input) {
+        if (!input || input === "NaN") return "";
+        
+        // If the JSON converter successfully made it a real array
+        if (Array.isArray(input)) {
+            return input.join(", ");
         }
+        
+        // If it's still a text string with brackets
+        if (typeof input === 'string') {
+            try {
+                const arr = JSON.parse(input);
+                return Array.isArray(arr) ? arr.join(", ") : input;
+            } catch (e) {
+                return input;
+            }
+        }
+        
+        // Fallback for any other unexpected data types
+        return String(input);
     }
 
     function getLevelColorStyle(levelString) {
