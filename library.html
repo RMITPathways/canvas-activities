@@ -529,8 +529,8 @@
         const savedBooks = getSavedBooks();
 
         const filtered = allBooks.filter(book => {
-            const title = book.Title ? book.Title.toLowerCase() : "";
-            const author = book.Author ? book.Author.toLowerCase() : "";
+            const title = book.Title ? String(book.Title).toLowerCase() : "";
+            const author = book.Author ? String(book.Author).toLowerCase() : "";
             const matchesSearch = title.includes(searchTerm) || author.includes(searchTerm);
             
             const bookCampus = parseArrayString(book.Campus);
