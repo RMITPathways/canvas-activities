@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Independent Study Hub - Library</title>
+<style>
+    :root {
+        --rmit-navy: #000054;
+        --rmit-red: #E61E2A;
+        --bg-color: #f9f9f9;
+        --border-color: #e3e5e0;
+        --text-dark: #333333;
+    }
+    body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background-color: var(--bg-color);
+        margin: 0;
+        padding: 20px;
+        color: var(--text-dark);
+    }
+    
+    /* Top Filters Bar */
+    .filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        background: #ffffff;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        margin-bottom: 25px;
+        border-left: 4px solid var(--rmit-navy);
+        align-items: center;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 140px;
+    }
+    .filter-group label {
+        font-size: 12px;
+        font-weight: bold;
+        color: var(--rmit-navy);
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+    .filter-group select, .filter-group input[type="text"] {
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: inherit;
+    }
+    .filter-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        color: var(--rmit-navy);
+        cursor: pointer;
+        padding: 10px;
+        background: #fff9e6;
+        border: 1px solid #f9c801;
+        border-radius: 4px;
+        margin-top: 15px;
+    }
+    
+    /* Book Grid */
+    .book-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    .book-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    .book-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: var(--rmit-navy);
+    }
+    .book-cover {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+        border-bottom: 1px solid var(--border-color);
+        background-color: #eee;
+    }
+    
+    /* Bookmark Button (Card) */
+    .bookmark-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255,255,255,0.95);
+        border: none;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        color: #ccc;
+        transition: all 0.2s;
+    }
+    .bookmark-btn:hover { transform: scale(1.1); }
+    .bookmark-btn.saved { color: var(--rmit-red); }
+
+    .book-info {
+        padding: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .book-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--rmit-navy);
+        margin: 0 0 5px 0;
+        line-height: 1.3;
+    }
+    .book-author {
+        font-size: 13px;
+        color: #666;
+        margin: 0 0 10px 0;
+    }
+    .book-meta-tags {
+        margin-top: auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    .badge {
+        background: #e6f2ff;
+        color: #005bb5;
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: bold;
+        display: inline-block;
+    }
+    .badge.campus {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    /* Pop-up Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .modal-content {
+        background: #fff;
+        max-width: 800px;
+        width: 100%;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+        position: relative;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-close {
+        position: absolute;
+        top: 15px; right: 15px;
+        background: #eee;
+        border: none;
+        font-size: 20px;
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-close:hover { background: #ddd; }
+    
+    .modal-left {
+        width: 35%;
+        background: #f4f4f4;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .modal-left img {
+        width: 100%;
+        max-width: 250px;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .modal-btn {
+        margin-top: 15px;
+        width: 100%;
+        text-align: center;
+        background: var(--rmit-red);
+        color: #fff;
+        text-decoration: none;
+        padding: 12px;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background 0.2s;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    .modal-btn:hover { background: var(--rmit-navy); }
+    
+    .modal-btn.secondary {
+        background: #fff;
+        color: var(--rmit-navy);
+        border: 2px solid var(--rmit-navy);
+    }
+    .modal-btn.secondary:hover {
+        background: #f0f4ff;
+    }
+    
+    .modal-right {
+        width: 65%;
+        padding: 30px;
+    }
+    .modal-right h2 { margin-top: 0; color: var(--rmit-navy); margin-bottom: 5px; }
+    .modal-right h4 { margin-top: 0; color: #666; font-weight: normal; margin-bottom: 20px; }
+    
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+    }
+    .detail-item { font-size: 13px; }
+    .detail-item strong { display: block; color: var(--rmit-navy); text-transform: uppercase; font-size: 11px; margin-bottom: 5px; }
+    
+    .modal-about {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #444;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .modal-content { flex-direction: column; }
+        .modal-left, .modal-right { width: 100%; padding: 20px; }
+        .modal-left img { max-width: 180px; }
+        .detail-grid { grid-template-columns: 1fr; }
+    }
+    
+    #no-results {
+        display: none;
+        text-align: center;
+        padding: 40px;
+        font-size: 18px;
+        color: #666;
+        grid-column: 1 / -1;
+    }
+</style>
+</head>
+<body>
+
+<!-- Filters -->
+<div class="filter-container">
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" id="search-input" placeholder="Search titles or authors...">
+    </div>
+    <div class="filter-group">
+        <label>Campus</label>
+        <select id="filter-campus">
+            <option value="">All Campuses</option>
+            <option value="SGS">SGS</option>
+            <option value="HN">HN</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Reading Level</label>
+        <select id="filter-level">
+            <option value="">All Levels</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Genre</label>
+        <select id="filter-genre">
+            <option value="">All Genres</option>
+        </select>
+    </div>
+    
+    <!-- Saved Books Toggle -->
+    <label class="filter-toggle">
+        <input type="checkbox" id="filter-saved"> Show My Saved Books (♥)
+    </label>
+</div>
+
+<!-- Gallery -->
+<div class="book-grid" id="book-grid">
+    <div id="no-results">No books match your current filters.</div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-left">
+            <img id="modal-img" src="" alt="Book Cover">
+            <button id="modal-save-btn" class="modal-btn secondary" onclick="toggleSaveFromModal()">♥ Save Book</button>
+            <a id="modal-link" href="#" target="_blank" class="modal-btn">Check Library Availability</a>
+        </div>
+        <div class="modal-right">
+            <h2 id="modal-title">Book Title</h2>
+            <h4 id="modal-author">Author Name</h4>
+            
+            <div class="detail-grid">
+                <div class="detail-item"><strong>Format</strong><span id="modal-format"></span></div>
+                <div class="detail-item"><strong>Category</strong><span id="modal-category"></span></div>
+                <div class="detail-item"><strong>Genre</strong><span id="modal-genre"></span></div>
+                <div class="detail-item"><strong>Reading Level</strong><span id="modal-level"></span></div>
+                <div class="detail-item"><strong>Series</strong><span id="modal-series"></span></div>
+                <div class="detail-item"><strong>Campus</strong><span id="modal-campus"></span></div>
+            </div>
+            
+            <div class="detail-item"><strong>About</strong></div>
+            <div class="modal-about" id="modal-about"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allBooks = [];
+    let currentModalBookId = null;
+    
+    // --- LOCAL STORAGE LOGIC ---
+    function getSavedBooks() {
+        return JSON.parse(localStorage.getItem('rmit_library_saved') || '[]');
+    }
+
+    function saveBooksList(list) {
+        localStorage.setItem('rmit_library_saved', JSON.stringify(list));
+    }
+
+    function toggleSave(id, event) {
+        if(event) event.stopPropagation(); // Prevent the modal from opening
+        
+        let saved = getSavedBooks();
+        if (saved.includes(id)) {
+            saved = saved.filter(savedId => savedId !== id);
+        } else {
+            saved.push(id);
+        }
+        saveBooksList(saved);
+        applyFilters(); 
+    }
+    
+    function toggleSaveFromModal() {
+        if(currentModalBookId !== null) {
+            toggleSave(currentModalBookId, null);
+            updateModalSaveButtonState();
+        }
+    }
+
+    function updateModalSaveButtonState() {
+        const saved = getSavedBooks();
+        const btn = document.getElementById('modal-save-btn');
+        if(saved.includes(currentModalBookId)) {
+            btn.innerHTML = '♥ Remove from Saved';
+            btn.style.color = 'var(--rmit-red)';
+        } else {
+            btn.innerHTML = '♡ Save Book';
+            btn.style.color = 'var(--rmit-navy)';
+        }
+    }
+
+    // --- UTILITIES ---
+    function parseArrayString(str) {
+        if (!str || str === "NaN") return "";
+        try {
+            const arr = JSON.parse(str);
+            return Array.isArray(arr) ? arr.join(", ") : str;
+        } catch (e) {
+            return str;
+        }
+    }
+
+    function getLevelColorStyle(levelString) {
+        if (!levelString) return '';
+        const str = levelString.toLowerCase();
+        if (str.includes('1.') || str.includes('pink')) return 'background-color: #ffcce6; color: #99004d; border: 1px solid #ff99cc;'; 
+        if (str.includes('2.') || str.includes('orange')) return 'background-color: #ffe5cc; color: #cc6600; border: 1px solid #ffcc99;'; 
+        if (str.includes('3.') || str.includes('green')) return 'background-color: #d6f5d6; color: #006600; border: 1px solid #99e699;'; 
+        if (str.includes('4.') || str.includes('yellow')) return 'background-color: #fff9cc; color: #b38600; border: 1px solid #ffea80;'; 
+        if (str.includes('5.') || str.includes('ungraded')) return 'background-color: #e6e6e6; color: #4d4d4d; border: 1px solid #cccccc;'; 
+        return '';
+    }
+
+    // --- INITIALIZATION ---
+    async function loadBooks() {
+        try {
+            const response = await fetch('books.json'); 
+            const data = await response.json();
+            
+            // Assign a unique ID using array index for local storage tracking
+            allBooks = data.map((book, index) => ({ ...book, id: index }));
+            
+            populateDropdowns();
+            applyFilters();
+        } catch (error) {
+            console.error("Error loading books:", error);
+            document.getElementById('no-results').style.display = 'block';
+            document.getElementById('no-results').innerText = "Failed to load library data. Ensure books.json is in the correct directory.";
+        }
+    }
+
+    function populateDropdowns() {
+        const levels = new Set();
+        const genres = new Set();
+
+        allBooks.forEach(book => {
+            const level = parseArrayString(book.ReadingLevel);
+            const genre = parseArrayString(book.Genre);
+            if (level) levels.add(level);
+            // Splitting multiple genres so they appear individually in the dropdown
+            if (genre) {
+                genre.split(', ').forEach(g => genres.add(g.trim()));
+            }
+        });
+
+        const levelSelect = document.getElementById('filter-level');
+        [...levels].sort().forEach(lvl => {
+            levelSelect.innerHTML += `<option value="${lvl}">${lvl}</option>`;
+        });
+
+        const genreSelect = document.getElementById('filter-genre');
+        [...genres].sort().forEach(g => {
+            genreSelect.innerHTML += `<option value="${g}">${g}</option>`;
+        });
+    }
+
+    function renderBooks(booksToRender) {
+        const grid = document.getElementById('book-grid');
+        const noResults = document.getElementById('no-results');
+        const savedBooks = getSavedBooks();
+        
+        grid.innerHTML = '';
+        grid.appendChild(noResults);
+
+        if (booksToRender.length === 0) {
+            noResults.style.display = 'block';
+            sendFrameHeight();
+            return;
+        }
+        noResults.style.display = 'none';
+
+        booksToRender.forEach(book => {
+            const campus = parseArrayString(book.Campus);
+            const level = parseArrayString(book.ReadingLevel);
+            const isSaved = savedBooks.includes(book.id);
+            
+            const card = document.createElement('div');
+            card.className = 'book-card';
+            card.onclick = () => openModal(book);
+            
+            card.innerHTML = `
+                <img class="book-cover" src="images/${book['Cover Image']}" alt="Cover" loading="lazy">
+                
+                <button class="bookmark-btn ${isSaved ? 'saved' : ''}" onclick="toggleSave(${book.id}, event)" title="Save Book">
+                    ${isSaved ? '♥' : '♡'}
+                </button>
+                
+                <div class="book-info">
+                    <h3 class="book-title">${book.Title}</h3>
+                    <!-- Removed hardcoded parentheses, just dash separator -->
+                    <p class="book-author">${book.Author} - ${book.Year}</p>
+                    <div class="book-meta-tags">
+                        <span class="badge campus">📍 ${campus}</span>
+                        ${level ? `<span class="badge" style="${getLevelColorStyle(level)}">${level}</span>` : ''}
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        
+        setTimeout(sendFrameHeight, 100);
+    }
+
+    // --- FILTERING ---
+    function applyFilters() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+        const campusFilter = document.getElementById('filter-campus').value;
+        const levelFilter = document.getElementById('filter-level').value;
+        const genreFilter = document.getElementById('filter-genre').value;
+        const showSaved = document.getElementById('filter-saved').checked;
+        const savedBooks = getSavedBooks();
+
+        const filtered = allBooks.filter(book => {
+            const title = book.Title ? book.Title.toLowerCase() : "";
+            const author = book.Author ? book.Author.toLowerCase() : "";
+            const matchesSearch = title.includes(searchTerm) || author.includes(searchTerm);
+            
+            const bookCampus = parseArrayString(book.Campus);
+            const matchesCampus = campusFilter === "" || bookCampus.includes(campusFilter);
+            
+            const bookLevel = parseArrayString(book.ReadingLevel);
+            const matchesLevel = levelFilter === "" || bookLevel === levelFilter;
+            
+            const bookGenre = parseArrayString(book.Genre);
+            const matchesGenre = genreFilter === "" || bookGenre.includes(genreFilter);
+            
+            const matchesSaved = !showSaved || savedBooks.includes(book.id);
+
+            return matchesSearch && matchesCampus && matchesLevel && matchesGenre && matchesSaved;
+        });
+
+        renderBooks(filtered);
+    }
+
+    document.getElementById('search-input').addEventListener('input', applyFilters);
+    document.getElementById('filter-campus').addEventListener('change', applyFilters);
+    document.getElementById('filter-level').addEventListener('change', applyFilters);
+    document.getElementById('filter-genre').addEventListener('change', applyFilters);
+    document.getElementById('filter-saved').addEventListener('change', applyFilters);
+
+    // --- MODAL ---
+    function openModal(book) {
+        currentModalBookId = book.id;
+        
+        document.getElementById('modal-img').src = `images/${book['Cover Image']}`;
+        document.getElementById('modal-title').innerText = book.Title;
+        // Removed hardcoded parentheses here as well
+        document.getElementById('modal-author').innerText = `${book.Author} - ${book.Year}`;
+        
+        document.getElementById('modal-format').innerText = parseArrayString(book.Format);
+        document.getElementById('modal-category').innerText = parseArrayString(book.Category);
+        document.getElementById('modal-genre').innerText = parseArrayString(book.Genre);
+        
+        // Reading Level styling in Modal
+        const levelText = parseArrayString(book.ReadingLevel);
+        const levelElement = document.getElementById('modal-level');
+        levelElement.innerText = levelText;
+        if (levelText) {
+            levelElement.className = 'badge';
+            levelElement.style = getLevelColorStyle(levelText);
+        } else {
+            levelElement.className = '';
+            levelElement.style = '';
+        }
+
+        document.getElementById('modal-series').innerText = book.Series || "N/A";
+        document.getElementById('modal-campus').innerText = parseArrayString(book.Campus);
+        
+        document.getElementById('modal-about').innerText = book.About || "No description available.";
+        
+        const linkBtn = document.getElementById('modal-link');
+        if(book.Permalink && book.Permalink !== "NaN") {
+            linkBtn.href = book.Permalink;
+            linkBtn.style.display = 'block';
+        } else {
+            linkBtn.style.display = 'none';
+        }
+
+        updateModalSaveButtonState();
+        document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('modal-overlay').style.display = 'none';
+        currentModalBookId = null;
+    }
+
+    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // --- CANVAS RESIZER ---
+    function sendFrameHeight() {
+        const height = document.documentElement.scrollHeight + 50;
+        window.parent.postMessage(JSON.stringify({ subject: 'lti.frameResize', height: height }), '*');
+        window.parent.postMessage({ subject: 'lti.frameResize', height: height }, '*');
+    }
+    window.addEventListener('resize', sendFrameHeight);
+
+    // Run
+    loadBooks();
+</script>
+
+</body>
+</html>
