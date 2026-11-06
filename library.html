@@ -264,11 +264,20 @@
         color: #444;
     }
 
-    /* Mobile Responsive */
+    /* Mobile Responsive Optimizations */
     @media (max-width: 768px) {
+        .filter-container { flex-direction: column; align-items: stretch; }
+        
+        /* Two-column layout for books on mobile rather than 1 giant column */
+        .book-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .book-cover { height: 200px; }
+        .book-title { font-size: 14px; }
+        .book-author { font-size: 12px; margin-bottom: 8px; }
+        .book-info { padding: 10px; }
+        
         .modal-content { flex-direction: column; }
         .modal-left, .modal-right { width: 100%; padding: 20px; }
-        .modal-left img { max-width: 180px; }
+        .modal-left img { max-width: 160px; }
         .detail-grid { grid-template-columns: 1fr; }
     }
     
@@ -294,20 +303,46 @@
         <label>Campus</label>
         <select id="filter-campus">
             <option value="">All Campuses</option>
-            <option value="SGS">SGS</option>
-            <option value="HN">HN</option>
+            <option value="SGS">Saigon</option>
+            <option value="HN">Hanoi</option>
+            <option value="DN">Da Nang</option>
         </select>
     </div>
     <div class="filter-group">
         <label>Reading Level</label>
         <select id="filter-level">
             <option value="">All Levels</option>
+            <option value="1. Graded (Pink)">Pink</option>
+            <option value="2. Graded (Red)">Red</option>
+            <option value="3. Graded (Yellow)">Yellow</option>
+            <option value="4. Graded (Blue)">Blue</option>
+            <option value="5. Ungraded">Ungraded</option>
         </select>
     </div>
     <div class="filter-group">
         <label>Genre</label>
         <select id="filter-genre">
             <option value="">All Genres</option>
+            <optgroup label="Fiction">
+                <option value="Action & adventure">Action & adventure</option>
+                <option value="Family, relationships & life">Family, relationships & life</option>
+                <option value="Fantasy">Fantasy</option>
+                <option value="Historical fiction">Historical fiction</option>
+                <option value="Humour & comedy">Humour & comedy</option>
+                <option value="Horror">Horror</option>
+                <option value="Mystery & thriller">Mystery & thriller</option>
+                <option value="Romance">Romance</option>
+                <option value="Science fiction">Science fiction</option>
+            </optgroup>
+            <optgroup label="Non-Fiction">
+                <option value="Art, culture & philosophy">Art, culture & philosophy</option>
+                <option value="History">History</option>
+                <option value="Memoir & biography">Memoir & biography</option>
+                <option value="Science & nature">Science & nature</option>
+                <option value="Science & technology">Science & technology</option>
+                <option value="Travel & geography">Travel & geography</option>
+                <option value="Sport & hobbies">Sport & hobbies</option>
+            </optgroup>
         </select>
     </div>
     
@@ -354,6 +389,15 @@
     let allBooks = [];
     let currentModalBookId = null;
     
+    // Data dictionary for transforming raw JSON text into clean UI text
+    const levelMap = {
+        "1. Graded (Pink)": "Pink",
+        "2. Graded (Red)": "Red",
+        "3. Graded (Yellow)": "Yellow",
+        "4. Graded (Blue)": "Blue",
+        "5. Ungraded": "Ungraded"
+    };
+    
     // --- LOCAL STORAGE LOGIC ---
     function getSavedBooks() {
         return JSON.parse(localStorage.getItem('rmit_library_saved') || '[]');
@@ -364,7 +408,7 @@
     }
 
     function toggleSave(id, event) {
-        if(event) event.stopPropagation(); // Prevent the modal from opening
+        if(event) event.stopPropagation();
         
         let saved = getSavedBooks();
         if (saved.includes(id)) {
@@ -398,13 +442,7 @@
     // --- UTILITIES ---
     function parseArrayString(input) {
         if (!input || input === "NaN") return "";
-        
-        // If the JSON converter successfully made it a real array
-        if (Array.isArray(input)) {
-            return input.join(", ");
-        }
-        
-        // If it's still a text string with brackets
+        if (Array.isArray(input)) return input.join(", ");
         if (typeof input === 'string') {
             try {
                 const arr = JSON.parse(input);
@@ -413,8 +451,6 @@
                 return input;
             }
         }
-        
-        // Fallback for any other unexpected data types
         return String(input);
     }
 
@@ -435,41 +471,13 @@
             const response = await fetch('books.json'); 
             const data = await response.json();
             
-            // Assign a unique ID using array index for local storage tracking
             allBooks = data.map((book, index) => ({ ...book, id: index }));
-            
-            populateDropdowns();
             applyFilters();
         } catch (error) {
             console.error("Error loading books:", error);
             document.getElementById('no-results').style.display = 'block';
             document.getElementById('no-results').innerText = "Failed to load library data. Ensure books.json is in the correct directory.";
         }
-    }
-
-    function populateDropdowns() {
-        const levels = new Set();
-        const genres = new Set();
-
-        allBooks.forEach(book => {
-            const level = parseArrayString(book.ReadingLevel);
-            const genre = parseArrayString(book.Genre);
-            if (level) levels.add(level);
-            // Splitting multiple genres so they appear individually in the dropdown
-            if (genre) {
-                genre.split(', ').forEach(g => genres.add(g.trim()));
-            }
-        });
-
-        const levelSelect = document.getElementById('filter-level');
-        [...levels].sort().forEach(lvl => {
-            levelSelect.innerHTML += `<option value="${lvl}">${lvl}</option>`;
-        });
-
-        const genreSelect = document.getElementById('filter-genre');
-        [...genres].sort().forEach(g => {
-            genreSelect.innerHTML += `<option value="${g}">${g}</option>`;
-        });
     }
 
     function renderBooks(booksToRender) {
@@ -489,7 +497,8 @@
 
         booksToRender.forEach(book => {
             const campus = parseArrayString(book.Campus);
-            const level = parseArrayString(book.ReadingLevel);
+            const rawLevel = parseArrayString(book.ReadingLevel);
+            const cleanLevel = levelMap[rawLevel] || rawLevel;
             const isSaved = savedBooks.includes(book.id);
             
             const card = document.createElement('div');
@@ -505,11 +514,10 @@
                 
                 <div class="book-info">
                     <h3 class="book-title">${book.Title}</h3>
-                    <!-- Removed hardcoded parentheses, just dash separator -->
                     <p class="book-author">${book.Author} - ${book.Year}</p>
                     <div class="book-meta-tags">
                         <span class="badge campus">📍 ${campus}</span>
-                        ${level ? `<span class="badge" style="${getLevelColorStyle(level)}">${level}</span>` : ''}
+                        ${rawLevel ? `<span class="badge" style="${getLevelColorStyle(rawLevel)}">${cleanLevel}</span>` : ''}
                     </div>
                 </div>
             `;
@@ -562,20 +570,19 @@
         
         document.getElementById('modal-img').src = `images/${book['Cover Image']}`;
         document.getElementById('modal-title').innerText = book.Title;
-        // Removed hardcoded parentheses here as well
         document.getElementById('modal-author').innerText = `${book.Author} - ${book.Year}`;
         
         document.getElementById('modal-format').innerText = parseArrayString(book.Format);
         document.getElementById('modal-category').innerText = parseArrayString(book.Category);
         document.getElementById('modal-genre').innerText = parseArrayString(book.Genre);
         
-        // Reading Level styling in Modal
-        const levelText = parseArrayString(book.ReadingLevel);
+        const rawLevel = parseArrayString(book.ReadingLevel);
+        const cleanLevel = levelMap[rawLevel] || rawLevel;
         const levelElement = document.getElementById('modal-level');
-        levelElement.innerText = levelText;
-        if (levelText) {
+        levelElement.innerText = cleanLevel;
+        if (rawLevel) {
             levelElement.className = 'badge';
-            levelElement.style = getLevelColorStyle(levelText);
+            levelElement.style = getLevelColorStyle(rawLevel);
         } else {
             levelElement.className = '';
             levelElement.style = '';
