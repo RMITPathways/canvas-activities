@@ -389,15 +389,6 @@
     let allBooks = [];
     let currentModalBookId = null;
     
-    // Data dictionary for transforming raw JSON text into clean UI text
-    const levelMap = {
-        "1. Graded (Pink)": "Pink",
-        "2. Graded (Red)": "Red",
-        "3. Graded (Yellow)": "Yellow",
-        "4. Graded (Blue)": "Blue",
-        "5. Ungraded": "Ungraded"
-    };
-    
     // --- LOCAL STORAGE LOGIC ---
     function getSavedBooks() {
         return JSON.parse(localStorage.getItem('rmit_library_saved') || '[]');
@@ -453,14 +444,25 @@
         }
         return String(input);
     }
+    
+    function getShortLevelName(levelString) {
+        if (!levelString) return '';
+        const str = levelString.toLowerCase();
+        if (str.includes('pink') || str.includes('1.')) return 'Pink';
+        if (str.includes('red') || str.includes('2.')) return 'Red';
+        if (str.includes('yellow') || str.includes('3.')) return 'Yellow';
+        if (str.includes('blue') || str.includes('4.')) return 'Blue';
+        if (str.includes('ungraded') || str.includes('5.')) return 'Ungraded';
+        return levelString; 
+    }
 
     function getLevelColorStyle(levelString) {
         if (!levelString) return '';
         const str = levelString.toLowerCase();
         if (str.includes('1.') || str.includes('pink')) return 'background-color: #ffcce6; color: #99004d; border: 1px solid #ff99cc;'; 
-        if (str.includes('2.') || str.includes('orange')) return 'background-color: #ffe5cc; color: #cc6600; border: 1px solid #ffcc99;'; 
-        if (str.includes('3.') || str.includes('green')) return 'background-color: #d6f5d6; color: #006600; border: 1px solid #99e699;'; 
-        if (str.includes('4.') || str.includes('yellow')) return 'background-color: #fff9cc; color: #b38600; border: 1px solid #ffea80;'; 
+        if (str.includes('2.') || str.includes('orange') || str.includes('red')) return 'background-color: #ffe5cc; color: #cc6600; border: 1px solid #ffcc99;'; 
+        if (str.includes('3.') || str.includes('green') || str.includes('yellow')) return 'background-color: #d6f5d6; color: #006600; border: 1px solid #99e699;'; 
+        if (str.includes('4.') || str.includes('blue')) return 'background-color: #cce0ff; color: #004080; border: 1px solid #99c2ff;'; 
         if (str.includes('5.') || str.includes('ungraded')) return 'background-color: #e6e6e6; color: #4d4d4d; border: 1px solid #cccccc;'; 
         return '';
     }
@@ -498,7 +500,7 @@
         booksToRender.forEach(book => {
             const campus = parseArrayString(book.Campus);
             const rawLevel = parseArrayString(book.ReadingLevel);
-            const cleanLevel = levelMap[rawLevel] || rawLevel;
+            const cleanLevel = getShortLevelName(rawLevel);
             const isSaved = savedBooks.includes(book.id);
             
             const card = document.createElement('div');
@@ -577,9 +579,10 @@
         document.getElementById('modal-genre').innerText = parseArrayString(book.Genre);
         
         const rawLevel = parseArrayString(book.ReadingLevel);
-        const cleanLevel = levelMap[rawLevel] || rawLevel;
+        const cleanLevel = getShortLevelName(rawLevel);
         const levelElement = document.getElementById('modal-level');
         levelElement.innerText = cleanLevel;
+        
         if (rawLevel) {
             levelElement.className = 'badge';
             levelElement.style = getLevelColorStyle(rawLevel);
