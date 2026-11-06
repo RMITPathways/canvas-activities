@@ -264,16 +264,48 @@
         color: #444;
     }
 
-    /* Mobile Responsive Optimizations */
+/* Mobile Responsive Optimizations */
     @media (max-width: 768px) {
         .filter-container { flex-direction: column; align-items: stretch; }
         
-        .book-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        .book-cover { height: 200px; }
-        .book-title { font-size: 14px; }
-        .book-author { font-size: 12px; margin-bottom: 8px; }
-        .book-info { padding: 10px; }
+        /* 1. Make filters horizontal (label left, input right) */
+        .filter-group { 
+            flex-direction: row; 
+            align-items: center; 
+            justify-content: space-between;
+        }
+        .filter-group label { 
+            margin-bottom: 0; 
+            flex: 0 0 35%; /* Gives the label a fixed proportional width */
+        }
+        .filter-group select, .filter-group input[type="text"] {
+            flex: 1; /* Input takes up the remaining space */
+        }
+
+        /* 2. Make book cards single-row (cover left, info right) */
+        .book-grid { grid-template-columns: 1fr; gap: 15px; }
         
+        .book-card { 
+            flex-direction: row; /* Flips the card horizontal */
+            align-items: stretch; 
+        }
+        .book-cover { 
+            width: 110px; 
+            min-width: 110px; 
+            height: auto; 
+            min-height: 150px;
+            border-bottom: none;
+            border-right: 1px solid var(--border-color);
+        }
+        .book-info { 
+            padding: 12px 45px 12px 12px; /* Extra right padding prevents text overlapping the heart button */
+            justify-content: center; /* Vertically centers the text block */
+        }
+        .book-title { font-size: 15px; margin-bottom: 4px; }
+        .book-author { font-size: 12px; margin-bottom: 8px; }
+        .book-meta-tags { margin-top: 0; }
+        
+        /* Modal tweaks */
         .modal-content { flex-direction: column; }
         .modal-left, .modal-right { width: 100%; padding: 20px; }
         .modal-left img { max-width: 160px; }
@@ -312,9 +344,9 @@
         <select id="filter-level">
             <option value="">All Levels</option>
             <option value="1. Graded (Pink)">Pink</option>
-            <option value="2. Graded (Orange)">Orange</option>
-            <option value="3. Graded (Green)">Green</option>
-            <option value="4. Graded (Yellow)">Yellow</option>
+            <option value="2. Graded (Red)">Red</option>
+            <option value="3. Graded (Yellow)">Yellow</option>
+            <option value="4. Graded (Blue)">Blue</option>
             <option value="5. Ungraded">Ungraded</option>
         </select>
     </div>
@@ -448,9 +480,9 @@
         if (!levelString) return '';
         const str = levelString.toLowerCase();
         if (str.includes('pink') || str.includes('1.')) return 'Pink';
-        if (str.includes('orange') || str.includes('2.')) return 'Orange';
-        if (str.includes('green') || str.includes('3.')) return 'Green';
-        if (str.includes('yellow') || str.includes('4.')) return 'Yellow';
+        if (str.includes('red') || str.includes('2.')) return 'Red';
+        if (str.includes('yellow') || str.includes('3.')) return 'Yellow';
+        if (str.includes('blue') || str.includes('4.')) return 'Blue';
         if (str.includes('ungraded') || str.includes('5.')) return 'Ungraded';
         return levelString; 
     }
@@ -459,9 +491,9 @@
         if (!levelString) return '';
         const str = levelString.toLowerCase();
         if (str.includes('1.') || str.includes('pink')) return 'background-color: #ffcce6; color: #99004d; border: 1px solid #ff99cc;'; 
-        if (str.includes('2.') || str.includes('orange')) return 'background-color: #ffe5cc; color: #cc6600; border: 1px solid #ffcc99;'; 
-        if (str.includes('3.') || str.includes('green')) return 'background-color: #d6f5d6; color: #006600; border: 1px solid #99e699;'; 
-        if (str.includes('4.') || str.includes('yellow')) return 'background-color: #fff9cc; color: #b38600; border: 1px solid #ffea80;'; 
+        if (str.includes('2.') || str.includes('orange') || str.includes('red')) return 'background-color: #ffe5cc; color: #cc6600; border: 1px solid #ffcc99;'; 
+        if (str.includes('3.') || str.includes('green') || str.includes('yellow')) return 'background-color: #d6f5d6; color: #006600; border: 1px solid #99e699;'; 
+        if (str.includes('4.') || str.includes('blue')) return 'background-color: #cce0ff; color: #004080; border: 1px solid #99c2ff;'; 
         if (str.includes('5.') || str.includes('ungraded')) return 'background-color: #e6e6e6; color: #4d4d4d; border: 1px solid #cccccc;'; 
         return '';
     }
