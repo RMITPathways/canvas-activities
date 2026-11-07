@@ -23,28 +23,26 @@
 /* Top Filters Bar */
     .filter-container {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: wrap; 
         gap: 15px;
         background: #ffffff;
-        padding: 20px;
+        padding: 15px 20px;
         border: 1px solid var(--border-color);
         border-radius: 6px;
         margin-bottom: 25px;
         border-left: 4px solid var(--rmit-navy);
-        align-items: center;
+        align-items: flex-end; /* Aligns the bottoms of all inputs and buttons perfectly */
         
-        /* New rules to freeze the filters bar */
         position: sticky;
         top: 0;
         z-index: 100; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* Optional: adds a slight drop shadow when scrolling */
-    }
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
     .filter-group {
         display: flex;
-        flex-direction: column;
+        flex-direction: column; /* Places labels above the inputs */
         flex: 1;
-        min-width: 140px;
+        min-width: 120px; /* Slightly reduced to guarantee single-row fit */
     }
     .filter-group label {
         font-size: 12px;
@@ -54,11 +52,13 @@
         text-transform: uppercase;
     }
     .filter-group select, .filter-group input[type="text"] {
-        padding: 10px;
+        padding: 0 10px;
         font-size: 14px;
         border: 1px solid #ccc;
         border-radius: 4px;
         font-family: inherit;
+        height: 38px; /* Locks height to match the button */
+        box-sizing: border-box;
     }
     .filter-toggle {
         display: flex;
@@ -68,11 +68,14 @@
         font-weight: bold;
         color: var(--rmit-navy);
         cursor: pointer;
-        padding: 10px;
+        padding: 0 15px;
         background: #fff9e6;
         border: 1px solid #f9c801;
         border-radius: 4px;
-        margin-top: 15px;
+        height: 38px; /* Locks height to match the inputs */
+        margin: 0; /* Removes top margin */
+        box-sizing: border-box;
+        white-space: nowrap; /* Prevents button text from breaking onto two lines */
     }
     
     /* Book Grid */
@@ -274,16 +277,6 @@
 /* Mobile Responsive Optimizations */
     @media (max-width: 768px) {
         
-        /* 1. Top Filters Bar */
-        .filter-container { flex-direction: column; align-items: stretch; padding: 15px; }
-        .filter-group { 
-            flex-direction: row; 
-            align-items: center; 
-            justify-content: space-between;
-            gap: 15px;
-        }
-        .filter-group label { margin-bottom: 0; min-width: 100px; }
-        .filter-group select, .filter-group input[type="text"] { flex: 1; width: 100%; }
         
         /* 2. Book Grid & Cards (Single Row Layout) */
         .book-grid { grid-template-columns: 1fr; gap: 12px; }
@@ -459,9 +452,9 @@
         </select>
     </div>
     
-    <!-- Saved Books Toggle -->
+<!-- Saved Books Toggle -->
     <label class="filter-toggle">
-        <input type="checkbox" id="filter-saved"> Show My Saved Books (♥)
+        <input type="checkbox" id="filter-saved"> Show Saved Books (♥)
     </label>
 </div>
 
