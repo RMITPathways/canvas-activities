@@ -338,13 +338,14 @@
             margin-bottom: 20px; /* Pushes the columns down */
         }
         
-        /* Row 3 to 5: Detail Box (Left Column) */
+       /* Row 3 to 5: Detail Box (Left Column) */
         .detail-grid { 
             grid-column: 1; 
             grid-row: 3 / 6; 
             grid-template-columns: 1fr; 
             gap: 10px;
-            align-self: start; 
+            align-self: stretch; /* Forces the box to match the right column's exact height */
+            align-content: space-between; /* Distributes extra empty space evenly between the text items */
             margin-bottom: 20px;
         }
         
