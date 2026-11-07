@@ -313,14 +313,13 @@
         /* 3. Pop-up Modal (CSS Grid Restructuring) */
         .modal-content { 
             display: grid;
-            grid-template-columns: 1fr 140px; /* Col 1: Text, Col 2: Image/Buttons (140px wide) */
-            grid-auto-rows: min-content; /* Keeps rows hugged tight to their content */
-            gap: 0 15px; /* 15px gap between the columns */
+            grid-template-columns: 1fr 140px; 
+            grid-auto-rows: min-content; 
+            gap: 0 15px; 
             padding: 20px; 
             box-sizing: border-box; 
         }
         
-        /* This magic rule removes the wrappers so elements can sit side-by-side in the grid */
         .modal-left, .modal-right { display: contents; }
         
         /* Row 1: Title (Full width) */
@@ -329,26 +328,30 @@
             grid-row: 1; 
             font-size: 22px;
             margin-bottom: 5px; 
-            padding-right: 35px; /* Prevents long titles overlapping the 'x' button */
+            padding-right: 35px; 
         }
         
-        /* Row 2: Author (Left Column) */
-        #modal-author { grid-column: 1; grid-row: 2; margin-bottom: 15px; }
+        /* Row 2: Author (Full width) */
+        #modal-author { 
+            grid-column: 1 / 3; 
+            grid-row: 2; 
+            margin-bottom: 20px; /* Pushes the columns down */
+        }
         
         /* Row 3 to 5: Detail Box (Left Column) */
         .detail-grid { 
             grid-column: 1; 
             grid-row: 3 / 6; 
-            grid-template-columns: 1fr; /* Stack detail items vertically */
+            grid-template-columns: 1fr; 
             gap: 10px;
             align-self: start; 
             margin-bottom: 20px;
         }
         
-        /* Row 2 & 3: Cover Image (Right Column) */
+        /* Row 3: Cover Image (Right Column, inline with Detail Box) */
         #modal-img { 
             grid-column: 2; 
-            grid-row: 2 / 4; 
+            grid-row: 3; 
             width: 100%; 
             height: auto;
             border-radius: 4px;
@@ -379,7 +382,7 @@
         }
         
         /* Row 6 & 7: About Section (Full width) */
-        .modal-right > .detail-item { grid-column: 1 / 3; grid-row: 6; } /* The 'ABOUT' title */
+        .modal-right > .detail-item { grid-column: 1 / 3; grid-row: 6; } 
         #modal-about { grid-column: 1 / 3; grid-row: 7; padding-bottom: 10px; }
     }
     
