@@ -293,7 +293,7 @@
             border-right: 1px solid var(--border-color); 
         }
         
-       /* Bookmark button moved to the bottom right */
+        /* Bookmark button moved to the bottom right */
         .bookmark-btn { 
             top: auto; 
             bottom: 10px; 
@@ -308,53 +308,79 @@
         }
         .book-title { font-size: 17px; margin-bottom: 6px; line-height: 1.2; }
         .book-author { font-size: 13px; margin-bottom: 12px; }
-        .book-meta-tags { margin-top: 0; } /* Allows tags to sit directly beneath the author */
+        .book-meta-tags { margin-top: 0; }
         
-        /* 3. Pop-up Modal */
+        /* 3. Pop-up Modal (CSS Grid Restructuring) */
         .modal-content { 
-            display: block; /* Overrides desktop flexbox */
+            display: grid;
+            grid-template-columns: 1fr 140px; /* Col 1: Text, Col 2: Image/Buttons (140px wide) */
+            grid-auto-rows: min-content; /* Keeps rows hugged tight to their content */
+            gap: 0 15px; /* 15px gap between the columns */
             padding: 20px; 
             box-sizing: border-box; 
         }
         
-        /* Floats the image & buttons to act as Column 2 */
-        .modal-left { 
-            float: right; 
-            width: 135px; 
-            padding: 0 0 15px 15px; 
-            background: transparent;
-            display: block;
-        }
-        .modal-left img { max-width: 100%; margin-bottom: 15px; border-radius: 4px; }
+        /* This magic rule removes the wrappers so elements can sit side-by-side in the grid */
+        .modal-left, .modal-right { display: contents; }
         
-        /* Allows button text to wrap naturally in the narrow column */
-        .modal-btn { 
-            padding: 10px 5px; 
-            font-size: 12px; 
-            white-space: normal; 
-            line-height: 1.2; 
+        /* Row 1: Title (Full width) */
+        #modal-title { 
+            grid-column: 1 / 3; 
+            grid-row: 1; 
+            font-size: 22px;
+            margin-bottom: 5px; 
+            padding-right: 35px; /* Prevents long titles overlapping the 'x' button */
         }
         
-        .modal-right { 
-            display: block;
-            width: auto; 
-            padding: 0; 
-        }
-        .modal-right h2 { font-size: 20px; margin-bottom: 5px; }
-        .modal-right h4 { font-size: 14px; margin-bottom: 15px; }
+        /* Row 2: Author (Left Column) */
+        #modal-author { grid-column: 1; grid-row: 2; margin-bottom: 15px; }
         
-        /* Forces the detail grid into a single column (Column 1) */
+        /* Row 3 to 5: Detail Box (Left Column) */
         .detail-grid { 
-            grid-template-columns: 1fr; 
-            gap: 10px; 
+            grid-column: 1; 
+            grid-row: 3 / 6; 
+            grid-template-columns: 1fr; /* Stack detail items vertically */
+            gap: 10px;
+            align-self: start; 
             margin-bottom: 20px;
         }
         
-        /* Forces About text underneath the image, and adds padding to fix the right-side clipping */
-        .modal-about {
-            clear: both; 
-            padding: 10px 10px 20px 0; 
+        /* Row 2 & 3: Cover Image (Right Column) */
+        #modal-img { 
+            grid-column: 2; 
+            grid-row: 2 / 4; 
+            width: 100%; 
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
         }
+        
+        /* Row 4: Save Button (Right Column) */
+        #modal-save-btn { 
+            grid-column: 2; 
+            grid-row: 4; 
+            align-self: start;
+            margin-top: 0; 
+            margin-bottom: 10px;
+            padding: 10px 5px;
+            font-size: 13px;
+        }
+        
+        /* Row 5: Link Button (Right Column) */
+        #modal-link { 
+            grid-column: 2; 
+            grid-row: 5; 
+            align-self: start;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding: 10px 5px;
+            font-size: 13px;
+        }
+        
+        /* Row 6 & 7: About Section (Full width) */
+        .modal-right > .detail-item { grid-column: 1 / 3; grid-row: 6; } /* The 'ABOUT' title */
+        #modal-about { grid-column: 1 / 3; grid-row: 7; padding-bottom: 10px; }
     }
     
     #no-results {
