@@ -723,14 +723,6 @@
         if (e.target === this) closeModal();
     });
 
-    // --- CANVAS RESIZER ---
-    function sendFrameHeight() {
-        const height = document.documentElement.scrollHeight + 50;
-        window.parent.postMessage(JSON.stringify({ subject: 'lti.frameResize', height: height }), '*');
-        window.parent.postMessage({ subject: 'lti.frameResize', height: height }, '*');
-    }
-    window.addEventListener('resize', sendFrameHeight);
-
     // Run
     loadBooks();
 </script>
